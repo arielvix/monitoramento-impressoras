@@ -153,3 +153,8 @@ docker compose start impressora-02
 
 Em produção, substitua as credenciais de exemplo, restrinja o token ao grupo
 de impressoras e use TLS no Agent 2 e no envio ao servidor Zabbix.
+
+Para usar impressoras físicas, siga também o
+[guia de produção](PRODUCAO-IMPRESSORAS-REAIS.md). Ele descreve a matriz de
+rede, o cadastro das filas reais, o modelo de permissões, a configuração do
+coletor e a entrada em operação para centenas de equipamentos.

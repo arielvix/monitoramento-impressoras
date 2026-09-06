@@ -18,6 +18,9 @@ Depois, siga o guia [REPLICAR-PRINT-SERVER.md](docs/REPLICAR-PRINT-SERVER.md)
 para preparar o Windows, configurar os clientes e setores e publicar a
 dashboard.
 
+Para implantação com equipamentos físicos, leia o
+[guia de produção](docs/PRODUCAO-IMPRESSORAS-REAIS.md).
+
 ## Componentes
 
 - Zabbix 7 com PostgreSQL;
