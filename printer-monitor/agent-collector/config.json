@@ -1,0 +1,256 @@
+{
+  "interval": 30,
+  "community": "public",
+  "zabbix": {
+    "enabled": false,
+    "api_url": "http://127.0.0.1:18080/api_jsonrpc.php",
+    "api_token": "",
+    "host_group": "Homologacao/Impressoras",
+    "template": "Printer by Windows Collector - Lab",
+    "sender_server": "127.0.0.1",
+    "sender_port": 11051,
+    "sender_path": "C:\\ProgramData\\ZabbixPrintLab\\zabbix_sender.exe"
+  },
+  "queue_overrides": {
+    "HML-Impressora-01": {
+      "address": "127.0.0.1",
+      "port": 11161,
+      "client": "SESA",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-02": {
+      "address": "127.0.0.1",
+      "port": 11162,
+      "client": "SESA",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-03": {
+      "address": "127.0.0.1",
+      "port": 11163,
+      "client": "SESA",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-04": {
+      "address": "127.0.0.1",
+      "port": 11164,
+      "client": "SESA",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-05": {
+      "address": "127.0.0.1",
+      "port": 11165,
+      "client": "SESA",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-06": {
+      "address": "127.0.0.1",
+      "port": 11166,
+      "client": "SESA",
+      "setor": "Hospitais"
+    },
+    "HML-Impressora-07": {
+      "address": "127.0.0.1",
+      "port": 11167,
+      "client": "SESA",
+      "setor": "Hospitais"
+    },
+    "HML-Impressora-08": {
+      "address": "127.0.0.1",
+      "port": 11168,
+      "client": "SESA",
+      "setor": "Hospitais"
+    },
+    "HML-Impressora-09": {
+      "address": "127.0.0.1",
+      "port": 11169,
+      "client": "SESA",
+      "setor": "Hospitais"
+    },
+    "HML-Impressora-10": {
+      "address": "127.0.0.1",
+      "port": 11170,
+      "client": "SESA",
+      "setor": "Hospitais"
+    },
+    "HML-Impressora-11": {
+      "address": "127.0.0.1",
+      "port": 11171,
+      "client": "SESA",
+      "setor": "Vigilancia"
+    },
+    "HML-Impressora-12": {
+      "address": "127.0.0.1",
+      "port": 11172,
+      "client": "SESA",
+      "setor": "Vigilancia"
+    },
+    "HML-Impressora-13": {
+      "address": "127.0.0.1",
+      "port": 11173,
+      "client": "SESA",
+      "setor": "Vigilancia"
+    },
+    "HML-Impressora-14": {
+      "address": "127.0.0.1",
+      "port": 11174,
+      "client": "SESA",
+      "setor": "Vigilancia"
+    },
+    "HML-Impressora-15": {
+      "address": "127.0.0.1",
+      "port": 11175,
+      "client": "SESA",
+      "setor": "Vigilancia"
+    },
+    "HML-Impressora-16": {
+      "address": "127.0.0.1",
+      "port": 11176,
+      "client": "SEJUS",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-17": {
+      "address": "127.0.0.1",
+      "port": 11177,
+      "client": "SEJUS",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-18": {
+      "address": "127.0.0.1",
+      "port": 11178,
+      "client": "SEJUS",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-19": {
+      "address": "127.0.0.1",
+      "port": 11179,
+      "client": "SEJUS",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-20": {
+      "address": "127.0.0.1",
+      "port": 11180,
+      "client": "SEJUS",
+      "setor": "Administrativo"
+    },
+    "HML-Impressora-21": {
+      "address": "127.0.0.1",
+      "port": 11181,
+      "client": "SEJUS",
+      "setor": "Unidades"
+    },
+    "HML-Impressora-22": {
+      "address": "127.0.0.1",
+      "port": 11182,
+      "client": "SEJUS",
+      "setor": "Unidades"
+    },
+    "HML-Impressora-23": {
+      "address": "127.0.0.1",
+      "port": 11183,
+      "client": "SEJUS",
+      "setor": "Unidades"
+    },
+    "HML-Impressora-24": {
+      "address": "127.0.0.1",
+      "port": 11184,
+      "client": "SEJUS",
+      "setor": "Unidades"
+    },
+    "HML-Impressora-25": {
+      "address": "127.0.0.1",
+      "port": 11185,
+      "client": "SEJUS",
+      "setor": "Unidades"
+    },
+    "HML-Impressora-26": {
+      "address": "127.0.0.1",
+      "port": 11186,
+      "client": "SEJUS",
+      "setor": "Tecnologia"
+    },
+    "HML-Impressora-27": {
+      "address": "127.0.0.1",
+      "port": 11187,
+      "client": "SEJUS",
+      "setor": "Tecnologia"
+    },
+    "HML-Impressora-28": {
+      "address": "127.0.0.1",
+      "port": 11188,
+      "client": "SEJUS",
+      "setor": "Tecnologia"
+    },
+    "HML-Impressora-29": {
+      "address": "127.0.0.1",
+      "port": 11189,
+      "client": "SEJUS",
+      "setor": "Tecnologia"
+    },
+    "HML-Impressora-30": {
+      "address": "127.0.0.1",
+      "port": 11190,
+      "client": "SEJUS",
+      "setor": "Tecnologia"
+    },
+    "HML-Impressora-31": {
+      "address": "127.0.0.1",
+      "port": 11191,
+      "client": "DETRAN",
+      "setor": "Atendimento"
+    },
+    "HML-Impressora-32": {
+      "address": "127.0.0.1",
+      "port": 11192,
+      "client": "DETRAN",
+      "setor": "Atendimento"
+    },
+    "HML-Impressora-33": {
+      "address": "127.0.0.1",
+      "port": 11193,
+      "client": "DETRAN",
+      "setor": "Atendimento"
+    },
+    "HML-Impressora-34": {
+      "address": "127.0.0.1",
+      "port": 11194,
+      "client": "DETRAN",
+      "setor": "Atendimento"
+    },
+    "HML-Impressora-35": {
+      "address": "127.0.0.1",
+      "port": 11195,
+      "client": "DETRAN",
+      "setor": "Atendimento"
+    },
+    "HML-Impressora-36": {
+      "address": "127.0.0.1",
+      "port": 11196,
+      "client": "DETRAN",
+      "setor": "Operacoes"
+    },
+    "HML-Impressora-37": {
+      "address": "127.0.0.1",
+      "port": 11197,
+      "client": "DETRAN",
+      "setor": "Operacoes"
+    },
+    "HML-Impressora-38": {
+      "address": "127.0.0.1",
+      "port": 11198,
+      "client": "DETRAN",
+      "setor": "Operacoes"
+    },
+    "HML-Impressora-39": {
+      "address": "127.0.0.1",
+      "port": 11199,
+      "client": "DETRAN",
+      "setor": "Operacoes"
+    },
+    "HML-Impressora-40": {
+      "address": "127.0.0.1",
+      "port": 11200,
+      "client": "DETRAN",
+      "setor": "Operacoes"
+    }
+  }
+}

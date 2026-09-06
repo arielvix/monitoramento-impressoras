@@ -1,0 +1,5 @@
+.env
+printer-monitor/agent-collector/runtime/
+printer-monitor/agent-collector/__pycache__/
+printer-monitor/agent-collector/cache.*
+printer-monitor/agent-collector/collector.log*

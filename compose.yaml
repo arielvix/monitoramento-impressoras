@@ -1,0 +1,404 @@
+name: monitoramento-impressoras
+
+services:
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - zabbix-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [monitoring]
+
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:${ZABBIX_VERSION}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_SERVER_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ZBX_STARTPOLLERS: 10
+      ZBX_STARTTRAPPERS: 5
+      ZBX_CACHESIZE: 128M
+    ports:
+      - "127.0.0.1:${ZABBIX_SERVER_PORT}:10051"
+    networks: [monitoring]
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:${ZABBIX_VERSION}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      zabbix-server:
+        condition: service_started
+    environment:
+      DB_SERVER_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_NAME: Zabbix Impressoras
+      PHP_TZ: America/Sao_Paulo
+    ports:
+      - "127.0.0.1:${ZABBIX_WEB_PORT}:8080"
+    networks: [monitoring]
+
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION}
+    restart: unless-stopped
+    depends_on:
+      zabbix-web:
+        condition: service_started
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_PLUGINS_PREINSTALL_SYNC: alexanderzobnin-zabbix-app
+      GF_SERVER_ROOT_URL: http://localhost:${GRAFANA_PORT}
+      ZABBIX_API_USER: ${ZABBIX_ADMIN_USER}
+      ZABBIX_API_PASSWORD: ${ZABBIX_ADMIN_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks: [monitoring]
+
+  impressora-01:
+    build: ./snmp-simulator
+    ports: ["127.0.0.1:11161:1161/udp"]
+    restart: unless-stopped
+    volumes: ["./snmp-simulator/printer-01:/data:ro"]
+    networks: [monitoring]
+
+  impressora-02:
+    build: ./snmp-simulator
+    ports: ["127.0.0.1:11162:1161/udp"]
+    restart: unless-stopped
+    volumes: ["./snmp-simulator/printer-02:/data:ro"]
+    networks: [monitoring]
+
+  impressora-03:
+    build: ./snmp-simulator
+    ports: ["127.0.0.1:11163:1161/udp"]
+    restart: unless-stopped
+    volumes: ["./snmp-simulator/printer-03:/data:ro"]
+    networks: [monitoring]
+
+  impressora-04:
+    build: ./snmp-simulator
+    ports: ["127.0.0.1:11164:1161/udp"]
+    restart: unless-stopped
+    volumes: ["./snmp-simulator/printer-04:/data:ro"]
+    networks: [monitoring]
+
+  impressora-05:
+    build: ./snmp-simulator
+    ports: ["127.0.0.1:11165:1161/udp"]
+    restart: unless-stopped
+    volumes: ["./snmp-simulator/printer-05:/data:ro"]
+    networks: [monitoring]
+
+  impressora-06:
+    build: ./snmp-simulator
+    ports: ["127.0.0.1:11166:1161/udp"]
+    restart: unless-stopped
+    volumes: ["./snmp-simulator/printer-06:/data:ro"]
+    networks: [monitoring]
+
+  impressora-07:
+    build: ./snmp-simulator
+    ports: ["127.0.0.1:11167:1161/udp"]
+    restart: unless-stopped
+    volumes: ["./snmp-simulator/printer-07:/data:ro"]
+    networks: [monitoring]
+
+  # BEGIN generated printer simulators
+  impressora-08:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11168:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-08:/data:ro
+    networks: [monitoring]
+  impressora-09:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11169:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-09:/data:ro
+    networks: [monitoring]
+  impressora-10:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11170:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-10:/data:ro
+    networks: [monitoring]
+  impressora-11:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11171:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-11:/data:ro
+    networks: [monitoring]
+  impressora-12:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11172:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-12:/data:ro
+    networks: [monitoring]
+  impressora-13:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11173:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-13:/data:ro
+    networks: [monitoring]
+  impressora-14:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11174:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-14:/data:ro
+    networks: [monitoring]
+  impressora-15:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11175:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-15:/data:ro
+    networks: [monitoring]
+  impressora-16:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11176:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-16:/data:ro
+    networks: [monitoring]
+  impressora-17:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11177:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-17:/data:ro
+    networks: [monitoring]
+  impressora-18:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11178:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-18:/data:ro
+    networks: [monitoring]
+  impressora-19:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11179:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-19:/data:ro
+    networks: [monitoring]
+  impressora-20:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11180:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-20:/data:ro
+    networks: [monitoring]
+  impressora-21:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11181:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-21:/data:ro
+    networks: [monitoring]
+  impressora-22:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11182:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-22:/data:ro
+    networks: [monitoring]
+  impressora-23:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11183:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-23:/data:ro
+    networks: [monitoring]
+  impressora-24:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11184:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-24:/data:ro
+    networks: [monitoring]
+  impressora-25:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11185:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-25:/data:ro
+    networks: [monitoring]
+  impressora-26:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11186:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-26:/data:ro
+    networks: [monitoring]
+  impressora-27:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11187:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-27:/data:ro
+    networks: [monitoring]
+  impressora-28:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11188:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-28:/data:ro
+    networks: [monitoring]
+  impressora-29:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11189:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-29:/data:ro
+    networks: [monitoring]
+  impressora-30:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11190:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-30:/data:ro
+    networks: [monitoring]
+  impressora-31:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11191:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-31:/data:ro
+    networks: [monitoring]
+  impressora-32:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11192:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-32:/data:ro
+    networks: [monitoring]
+  impressora-33:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11193:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-33:/data:ro
+    networks: [monitoring]
+  impressora-34:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11194:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-34:/data:ro
+    networks: [monitoring]
+  impressora-35:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11195:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-35:/data:ro
+    networks: [monitoring]
+  impressora-36:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11196:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-36:/data:ro
+    networks: [monitoring]
+  impressora-37:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11197:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-37:/data:ro
+    networks: [monitoring]
+  impressora-38:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11198:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-38:/data:ro
+    networks: [monitoring]
+  impressora-39:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11199:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-39:/data:ro
+    networks: [monitoring]
+  impressora-40:
+    build: ./snmp-simulator
+    ports:
+      - "127.0.0.1:11200:1161/udp"
+    restart: unless-stopped
+    volumes:
+      - ./snmp-simulator/printer-40:/data:ro
+    networks: [monitoring]
+  # END generated printer simulators
+  # printer simulator anchor
+volumes:
+  zabbix-db:
+  grafana-data:
+
+networks:
+  monitoring:
+    driver: bridge

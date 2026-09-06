@@ -1,0 +1,753 @@
+{
+  "uid": "impressoras-n1",
+  "title": "N1 | Impressoras — disponibilidade",
+  "description": "Visão N1 dos hosts individuais de impressoras. Cada fila descoberta pelo Windows cria um host no Zabbix e recebe métricas via coletor.",
+  "tags": [
+    "N1",
+    "Impressoras",
+    "Zabbix"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 41,
+  "version": 0,
+  "editable": true,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m"
+    ],
+    "time_options": [
+      "24h",
+      "7d",
+      "15d",
+      "30d"
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "hostname",
+        "label": "Impressora / hostname",
+        "type": "query",
+        "datasource": {
+          "type": "alexanderzobnin-zabbix-datasource",
+          "uid": "zabbix-homologacao"
+        },
+        "query": {
+          "queryType": "host",
+          "group": "Homologacao/Impressoras",
+          "host": "/.*/"
+        },
+        "regex": "",
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "options": [],
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "printer_client",
+        "label": "Cliente",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "zabbix-postgres"
+        },
+        "definition": "SELECT DISTINCT tag.value AS __text, tag.value AS __value\nFROM host_tag tag\nJOIN hosts h ON h.hostid = tag.hostid AND h.status = 0\nJOIN hosts_groups hg ON hg.hostid = h.hostid\nJOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\nWHERE tag.tag = 'client'\nORDER BY tag.value",
+        "query": "SELECT DISTINCT tag.value AS __text, tag.value AS __value\nFROM host_tag tag\nJOIN hosts h ON h.hostid = tag.hostid AND h.status = 0\nJOIN hosts_groups hg ON hg.hostid = h.hostid\nJOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\nWHERE tag.tag = 'client'\nORDER BY tag.value",
+        "refresh": 1,
+        "sort": 0,
+        "hide": 0,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "options": [],
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "printer_setor",
+        "label": "Setor",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "zabbix-postgres"
+        },
+        "definition": "SELECT DISTINCT sector.value AS __text, sector.value AS __value\nFROM host_tag sector\nJOIN host_tag client ON client.hostid = sector.hostid AND client.tag = 'client'\nJOIN hosts h ON h.hostid = sector.hostid AND h.status = 0\nJOIN hosts_groups hg ON hg.hostid = h.hostid\nJOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\nWHERE sector.tag = 'setor'\n  AND client.value ~ '${printer_client:regex}'\nORDER BY sector.value",
+        "query": "SELECT DISTINCT sector.value AS __text, sector.value AS __value\nFROM host_tag sector\nJOIN host_tag client ON client.hostid = sector.hostid AND client.tag = 'client'\nJOIN hosts h ON h.hostid = sector.hostid AND h.status = 0\nJOIN hosts_groups hg ON hg.hostid = h.hostid\nJOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\nWHERE sector.tag = 'setor'\n  AND client.value ~ '${printer_client:regex}'\nORDER BY sector.value",
+        "refresh": 1,
+        "sort": 0,
+        "hide": 0,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "options": [],
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "availability_period",
+        "label": "Disponibilidade — período próprio",
+        "type": "custom",
+        "query": "24 horas : 86400,7 dias : 604800,15 dias : 1296000,30 dias : 2592000",
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "24 horas",
+          "value": "86400"
+        }
+      },
+      {
+        "name": "printer_page",
+        "label": "Página — 10 impressoras",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "zabbix-postgres"
+        },
+        "definition": "WITH printer_count AS (\n  SELECT COUNT(*) AS total\n  FROM hosts h\n  JOIN hosts_groups hg ON hg.hostid = h.hostid\n  JOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\n  JOIN host_tag client_tag ON client_tag.hostid = h.hostid AND client_tag.tag = 'client'\n  JOIN host_tag sector_tag ON sector_tag.hostid = h.hostid AND sector_tag.tag = 'setor'\n  WHERE h.status = 0\n    AND h.name ~ '${hostname:regex}'\n    AND client_tag.value ~ '${printer_client:regex}'\n    AND sector_tag.value ~ '${printer_setor:regex}'\n)\nSELECT page::text AS __text, page::text AS __value\nFROM printer_count,\n     generate_series(1, GREATEST(1, CEIL(printer_count.total / 10.0)::integer)) AS page",
+        "query": "WITH printer_count AS (\n  SELECT COUNT(*) AS total\n  FROM hosts h\n  JOIN hosts_groups hg ON hg.hostid = h.hostid\n  JOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\n  JOIN host_tag client_tag ON client_tag.hostid = h.hostid AND client_tag.tag = 'client'\n  JOIN host_tag sector_tag ON sector_tag.hostid = h.hostid AND sector_tag.tag = 'setor'\n  WHERE h.status = 0\n    AND h.name ~ '${hostname:regex}'\n    AND client_tag.value ~ '${printer_client:regex}'\n    AND sector_tag.value ~ '${printer_setor:regex}'\n)\nSELECT page::text AS __text, page::text AS __value\nFROM printer_count,\n     generate_series(1, GREATEST(1, CEIL(printer_count.total / 10.0)::integer)) AS page",
+        "refresh": 1,
+        "sort": 0,
+        "hide": 0,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {
+          "text": "1",
+          "value": "1"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "CENTRAL N1 • IMPRESSORAS",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Verde: online · Vermelho: offline · Sem dados: verificar coletor**\n\nFiltre por cliente e setor. Escolha a página para ver 10 impressoras por vez. Fila e demais gráficos usam o período geral; disponibilidade tem seletor próprio. Atualização: **30 s**."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Última coleta do coletor Windows",
+      "type": "stat",
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 3
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "zabbix-homologacao"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "zabbix-homologacao"
+          },
+          "schema": 12,
+          "queryType": "0",
+          "mode": 0,
+          "application": {
+            "filter": ""
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "item": {
+            "filter": "Print server: ultima coleta"
+          },
+          "functions": [
+            {
+              "def": {
+                "name": "scale",
+                "category": "Transform",
+                "params": [
+                  {
+                    "type": "float",
+                    "name": "factor"
+                  }
+                ],
+                "defaultParams": [
+                  100
+                ]
+              },
+              "params": [
+                "1000"
+              ]
+            }
+          ],
+          "options": {
+            "count": false,
+            "disableDataAlignment": true,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "false",
+            "useZabbixValueMapping": false
+          },
+          "resultFormat": "time_series",
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "trigger": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "evaltype": "0",
+          "group": {
+            "filter": "Homologacao/Print Server"
+          },
+          "host": {
+            "filter": "Print Server Windows - DESKTOP-B5QD50N"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "noValue": "SEM COLETA"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
+        "colorMode": "none",
+        "graphMode": "none"
+      },
+      "timeFrom": "2m"
+    },
+    {
+      "id": 3,
+      "title": "Serviço de impressão do coletor",
+      "type": "stat",
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 3
+      },
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "zabbix-homologacao"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "zabbix-homologacao"
+          },
+          "schema": 12,
+          "queryType": "0",
+          "mode": 0,
+          "application": {
+            "filter": ""
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "item": {
+            "filter": "Print server: Spooler (0=executando)"
+          },
+          "functions": [],
+          "options": {
+            "count": false,
+            "disableDataAlignment": true,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "false",
+            "useZabbixValueMapping": false
+          },
+          "resultFormat": "time_series",
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "trigger": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "evaltype": "0",
+          "group": {
+            "filter": "Homologacao/Print Server"
+          },
+          "host": {
+            "filter": "Print Server Windows - DESKTOP-B5QD50N"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "ATIVO",
+                  "color": "green"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "noValue": "SEM DADOS"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "timeFrom": "2m"
+    },
+    {
+      "id": 6,
+      "title": "Histórico de disponibilidade · período próprio",
+      "type": "state-timeline",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "zabbix-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH paged_hosts AS (\n  SELECT h.hostid, h.name\n  FROM hosts h\n  JOIN hosts_groups hg ON hg.hostid = h.hostid\n  JOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\n  JOIN host_tag client_tag ON client_tag.hostid = h.hostid AND client_tag.tag = 'client'\n  JOIN host_tag sector_tag ON sector_tag.hostid = h.hostid AND sector_tag.tag = 'setor'\n  WHERE h.status = 0\n    AND h.name ~ '${hostname:regex}'\n    AND client_tag.value ~ '${printer_client:regex}'\n    AND sector_tag.value ~ '${printer_setor:regex}'\n  ORDER BY h.name\n  LIMIT 10 OFFSET ((CAST('${printer_page}' AS integer) - 1) * 10)\n)\nSELECT to_timestamp(history.clock) AS \"time\",\n       h.name AS metric,\n       history.value AS value\nFROM history_uint history\nJOIN items item ON item.itemid = history.itemid AND item.key_ = 'printer.available'\nJOIN paged_hosts h ON h.hostid = item.hostid\nWHERE history.clock >= EXTRACT(EPOCH FROM NOW() - (CAST('${availability_period}' AS integer) * INTERVAL '1 second'))\nORDER BY \"time\"",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "zabbix-postgres"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 1,
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OFFLINE",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "ONLINE",
+                  "color": "green"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "SEM DADOS",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "SEM DADOS",
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 85,
+            "spanNulls": false,
+            "insertNulls": 90000
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "auto",
+        "alignValue": "center",
+        "rowHeight": 0.8,
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "transformations": [],
+      "description": "Usa o seletor de disponibilidade e mostra somente as 10 impressoras da página atual."
+    },
+    {
+      "id": 8,
+      "title": "Trabalhos na fila · período geral",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "zabbix-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH paged_hosts AS (\n  SELECT h.hostid, h.name\n  FROM hosts h\n  JOIN hosts_groups hg ON hg.hostid = h.hostid\n  JOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\n  JOIN host_tag client_tag ON client_tag.hostid = h.hostid AND client_tag.tag = 'client'\n  JOIN host_tag sector_tag ON sector_tag.hostid = h.hostid AND sector_tag.tag = 'setor'\n  WHERE h.status = 0\n    AND h.name ~ '${hostname:regex}'\n    AND client_tag.value ~ '${printer_client:regex}'\n    AND sector_tag.value ~ '${printer_setor:regex}'\n  ORDER BY h.name\n  LIMIT 10 OFFSET ((CAST('${printer_page}' AS integer) - 1) * 10)\n)\nSELECT to_timestamp(history.clock) AS \"time\",\n       h.name AS metric,\n       history.value AS value\nFROM history_uint history\nJOIN items item ON item.itemid = history.itemid AND item.key_ = 'printer.jobs'\nJOIN paged_hosts h ON h.hostid = item.hostid\nWHERE history.clock >= (CAST(${__from} AS bigint) / 1000)\n  AND history.clock <= (CAST(${__to} AS bigint) / 1000)\nORDER BY \"time\"",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "zabbix-postgres"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "decimals": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 65,
+            "lineWidth": 1,
+            "spanNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "transformations": [],
+      "description": "Usa o período geral e a página selecionada."
+    },
+    {
+      "id": 10,
+      "type": "text",
+      "title": "Período da visão geral",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "[24 horas](/d/impressoras-n1?from=now-24h&to=now&var-availability_period=${availability_period}&var-printer_page=${printer_page}&${hostname:queryparam}&${printer_client:queryparam}&${printer_setor:queryparam})  ·  [7 dias](/d/impressoras-n1?from=now-7d&to=now&var-availability_period=${availability_period}&var-printer_page=${printer_page}&${hostname:queryparam}&${printer_client:queryparam}&${printer_setor:queryparam})  ·  [15 dias](/d/impressoras-n1?from=now-15d&to=now&var-availability_period=${availability_period}&var-printer_page=${printer_page}&${hostname:queryparam}&${printer_client:queryparam}&${printer_setor:queryparam})  ·  [30 dias](/d/impressoras-n1?from=now-30d&to=now&var-availability_period=${availability_period}&var-printer_page=${printer_page}&${hostname:queryparam}&${printer_client:queryparam}&${printer_setor:queryparam})"
+      }
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "PRIORIDADE N1 — incidentes e toner baixo primeiro",
+      "description": "Mostra as 10 impressoras da página atual, ordenadas por disponibilidade e depois pelo menor toner.",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "zabbix-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH paged_hosts AS (\n  SELECT h.hostid, h.name\n  FROM hosts h\n  JOIN hosts_groups hg ON hg.hostid = h.hostid\n  JOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\n  JOIN host_tag client_tag ON client_tag.hostid = h.hostid AND client_tag.tag = 'client'\n  JOIN host_tag sector_tag ON sector_tag.hostid = h.hostid AND sector_tag.tag = 'setor'\n  WHERE h.status = 0\n    AND h.name ~ '${hostname:regex}'\n    AND client_tag.value ~ '${printer_client:regex}'\n    AND sector_tag.value ~ '${printer_setor:regex}'\n  ORDER BY h.name\n  LIMIT 10 OFFSET ((CAST('${printer_page}' AS integer) - 1) * 10)\n)\nSELECT h.name AS \"Impressora\",\n       CASE WHEN latest_available.value = 1 THEN 'ONLINE' ELSE 'OFFLINE' END AS \"Status\",\n       latest_available.value AS \"Disponibilidade\",\n       COALESCE(latest_toner.value, -1) AS \"Toner (%)\",\n       COALESCE(latest_pages.value, 0) AS \"Paginas\"\nFROM paged_hosts h\nJOIN items availability ON availability.hostid = h.hostid AND availability.key_ = 'printer.available'\nJOIN LATERAL (\n  SELECT value FROM history_uint\n  WHERE itemid = availability.itemid\n  ORDER BY clock DESC, ns DESC LIMIT 1\n) latest_available ON true\nLEFT JOIN items toner ON toner.hostid = h.hostid AND toner.key_ = 'printer.toner'\nLEFT JOIN LATERAL (\n  SELECT value FROM history\n  WHERE itemid = toner.itemid\n  ORDER BY clock DESC, ns DESC LIMIT 1\n) latest_toner ON true\nLEFT JOIN items pages ON pages.hostid = h.hostid AND pages.key_ = 'printer.pages'\nLEFT JOIN LATERAL (\n  SELECT value FROM history_uint\n  WHERE itemid = pages.itemid\n  ORDER BY clock DESC, ns DESC LIMIT 1\n) latest_pages ON true\nORDER BY latest_available.value ASC, COALESCE(latest_toner.value, 999) ASC, h.name ASC",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "zabbix-postgres"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "ONLINE": {
+                        "text": "ONLINE",
+                        "color": "green"
+                      },
+                      "OFFLINE": {
+                        "text": "OFFLINE",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Toner (%)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 20
+                    },
+                    {
+                      "color": "green",
+                      "value": 40
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "gradient",
+                  "valueDisplayMode": "color"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "bargauge",
+      "title": "Disponibilidade por impressora · período próprio",
+      "description": "Calculado pelo seletor de disponibilidade e limitado às 10 impressoras da página atual.",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 7
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "zabbix-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH paged_hosts AS (\n  SELECT h.hostid, h.name\n  FROM hosts h\n  JOIN hosts_groups hg ON hg.hostid = h.hostid\n  JOIN hstgrp g ON g.groupid = hg.groupid AND g.name = 'Homologacao/Impressoras'\n  JOIN host_tag client_tag ON client_tag.hostid = h.hostid AND client_tag.tag = 'client'\n  JOIN host_tag sector_tag ON sector_tag.hostid = h.hostid AND sector_tag.tag = 'setor'\n  WHERE h.status = 0\n    AND h.name ~ '${hostname:regex}'\n    AND client_tag.value ~ '${printer_client:regex}'\n    AND sector_tag.value ~ '${printer_setor:regex}'\n  ORDER BY h.name\n  LIMIT 10 OFFSET ((CAST('${printer_page}' AS integer) - 1) * 10)\n)\nSELECT NOW() AS \"time\",\n       h.name AS metric,\n       AVG(history.value) * 100 AS value\nFROM history_uint history\nJOIN items item ON item.itemid = history.itemid AND item.key_ = 'printer.available'\nJOIN paged_hosts h ON h.hostid = item.hostid\nWHERE history.clock >= EXTRACT(EPOCH FROM NOW() - (CAST('${availability_period}' AS integer) * INTERVAL '1 second'))\nGROUP BY h.name\nORDER BY h.name",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "zabbix-postgres"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "decimals": 2,
+          "noValue": "SEM DADOS",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 95
+              },
+              {
+                "color": "green",
+                "value": 99
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "minVizHeight": 28,
+        "minVizWidth": 0,
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "namePlacement": "left",
+        "valueMode": "color"
+      }
+    }
+  ]
+}
