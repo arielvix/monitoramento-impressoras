@@ -21,6 +21,9 @@ dashboard.
 Para implantação com equipamentos físicos, leia o
 [guia de produção](docs/PRODUCAO-IMPRESSORAS-REAIS.md).
 
+Use o [roteiro de validação](docs/VALIDACAO.md) para homologar a stack e as
+impressoras reais antes da liberação ao N1.
+
 ## Componentes
 
 - Zabbix 7 com PostgreSQL;

@@ -150,3 +150,6 @@ na produção.
 4. Amplie por lotes, acompanhando o tempo de coleta e o volume de eventos.
 5. Documente o responsável por cada cliente/setor e o procedimento para troca
    de IP, fila ou equipamento.
+
+Antes da liberação, execute o [roteiro de validação](VALIDACAO.md), que cobre
+o fluxo completo do SNMP até a dashboard e os testes de indisponibilidade.
